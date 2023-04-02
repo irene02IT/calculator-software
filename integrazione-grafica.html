@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Algoritmi per il calcolo numerico</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href='favicon.ico' rel='icon'>
+  <link href='favicon.ico' rel='apple-touch-icon'>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<div class="jumbotron text-center" style="margin-bottom:0">
+  <h1>Integrazione per via grafica</h1> 
+</div>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="#">Algoritmi per il calcolo numerico</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="tangenti.html">Metodo delle tangenti (o di Newton)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="bisezione.html">Metodo di bisezione</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="punto-fisso.html">Metodo del punto fisso</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="integrazione-grafica.html">Integrazione per via grafica</a>
+      </li>	  
+    </ul>
+  </div>  
+</nav>
+
+<div class="container" style="margin-top:30px">
+  <div class="row">
+
+	  <div class="col-sm-12">
+		  <form name="equazione">
+			<div class="input-group mb-3" >
+			  <input type="text" class="form-control" name="display" placeholder="Equazione" value="Math.cos(x)">
+			  <div class="input-group-append">
+				<span class="input-group-text">= f(x)</span>
+				<button class="btn btn-success" type="button" onclick="disegnaGrafico()">grafico</button>
+				<button class="btn btn-success" type="button" onclick="disegnaIntegraleRettangoli()">integrale - metodo dei rettangoli</button>
+				<button class="btn btn-success" type="button" onclick="disegnaIntegraleTrapezi()">integrale - metodo dei trapezi</button>
+				<button type="button" class="btn btn-danger" id="canc-all" onclick="equazione.display.value=''">cancella</button>
+			  </div>
+			</div>
+		  </form>
+	  </div>			
+  </div>
+
+  <div class="row">
+	  <div class="col-sm-2">
+		<div class="form-group">
+		  <label for="a">Estremo sinistro:</label>
+		  <input type="number" class="form-control" id="a" value="-2" step="1" min="-20" placeholder="Estremo sinistro">
+		</div>
+	  </div>
+	  <div class="col-sm-2">
+		<div class="form-group">
+		  <label for="b">Estremo destro:</label>
+		  <input type="number" class="form-control" id="b" value="2" step="1" max="20" placeholder="Estremo destro">
+		</div>
+	  </div>
+	  <div class="col-sm-3">
+		  <label for="n">Numero di intervalli/punti:</label>
+		  <input type="number" class="form-control" id="n" value="10" step="5" placeholder="numero punti">
+	  </div>
+	  <div class="col-sm-3">
+		  <label for="u">Dimensioni grafico:</label>
+		  <input type="number" class="form-control" id="u" value="400" step="10" placeholder="lato canvas">
+	  </div>		  
+	  <div class="col-sm-2">
+		  <label for="area">Area:</label>
+		  <textarea  type="text" class="form-control" id="area" placeholder="area"></textarea>
+	  </div>	  
+	<div class="container-fluid ">
+		<canvas id="integrale" width="800" height="600" style="border:1px solid #000000;"></canvas>
+	</div>
+  </div>
+</div>
+
+<div class="jumbotron text-center" style="margin-bottom:0">
+  <p>Irene Erba - IS Rota</p>
+</div>
+
+
+<script language="javascript">
+function cancella() {
+  var temp = document.equazione.display.value;
+  document.equazione.display.value = temp.substring(0, temp.length-1);
+}
+
+
+function calcFunzione(q){		//ok
+	let testo=document.equazione.display.value;				//corregge il caso di Math.exp: nasconde la 'x' con una
+	var hidexp=testo.toString().replace(/exp/g,'eàp');		//b(lettera a caso che non compare nelle funzioni)
+	hidexp=hidexp.replace(/x/g,q);
+	var f=hidexp.replace(/à/g,'x')
+	return eval(f);	
+	
+}
+
+function calcolaAreaRett(b,h){
+var a=b*h;
+return a;
+}
+
+function calcolaAreaTrap(b,B,h){
+var a=(b+B)*h/2;
+return a;
+}
+
+function myDisplayer(some) {	
+  document.getElementById("area").innerHTML = some;
+}
+
+function disegnaAssi(u){
+		var canvas = document.getElementById("integrale");
+		var ctx = canvas.getContext("2d");
+		var xc=u/2, yc=u/2;
+		var a=-2, b=2, n=1000;
+		ctx.moveTo(xc, 0);
+		ctx.lineTo(xc, 3*u);
+		ctx.stroke();
+		ctx.moveTo(0, yc);
+		ctx.lineTo(3*u, yc);
+		ctx.stroke();
+		ctx.font = ""+1/40*u+"px Arial";
+		var dx=u/Math.abs(b-a);
+		for(var i=1; i<20; i++){
+		ctx.fillText("-"+i, xc, yc+i*dx);		
+		ctx.fillText("+"+i, xc, yc-i*dx);
+		ctx.fillText("-"+i, xc-i*dx, yc);
+		ctx.fillText("+"+i, xc+i*dx, yc);
+		}
+}
+
+function disegnaIntegraleRettangoli(){
+
+		var areatot=0, arett=0;
+		var canvas = document.getElementById("integrale");
+		var ctx = canvas.getContext("2d");
+		canvas.width = canvas.width;
+		var u=Number(document.getElementById("u").value);
+		disegnaAssi(u);
+
+		var a=Number(document.getElementById("a").value);
+		var b=Number(document.getElementById("b").value);
+		var n=Number(document.getElementById("n").value);
+		var k =Math.abs(b-a)/n;
+		
+		var y;
+		for (var i=a; i<b;i=i+k){
+		y=calcFunzione(i);
+		var canvas = document.getElementById("integrale");
+		var ctx = canvas.getContext("2d");
+		ctx.fillStyle = "#000000";
+		ctx.fillRect(i*(1/4*u)+(u/2),(u/2)-(1/4*u)*y,2,2);				//mantengo le proporzioni 1:1
+		ctx.rect(i*(1/4*u)+(u/2), (u/2)-(1/4*u)*y, 1/4*k*u, (1/4*u)*y);
+		ctx.stroke();
+		arett=calcolaAreaRett(k,y);
+		areatot+=arett;
+		}
+		myDisplayer(areatot);
+}
+function disegnaIntegraleTrapezi(){
+
+		var areatot=0, atrap=0;
+		var canvas = document.getElementById("integrale");
+		var ctx = canvas.getContext("2d");
+		canvas.width = canvas.width;
+		var u=Number(document.getElementById("u").value);
+		disegnaAssi(u);
+
+		var a=Number(document.getElementById("a").value);
+		var b=Number(document.getElementById("b").value);
+		var n=Number(document.getElementById("n").value);
+		var k =Math.abs(b-a)/n;
+
+		
+		var b1=0, b2=0;
+		for (var i=a; i<b;i=i+k){
+		b1=calcFunzione(i);
+		b2=calcFunzione(i+k);
+		var canvas = document.getElementById("integrale");
+		var ctx = canvas.getContext("2d");
+		ctx.fillStyle = "#000000";
+															
+		ctx.moveTo(i*(1/4*u)+(u/2),(u/2)-(1/4*u)*b1);		
+		ctx.lineTo(i*(1/4*u)+(u/2), (u/2));
+		ctx.stroke();		
+
+		ctx.moveTo(i*(1/4*u)+(u/2),(u/2)-(1/4*u)*b1);		
+		ctx.lineTo((i+k)*(1/4*u)+(u/2),(u/2)-(1/4*u)*b2);	 	
+		ctx.stroke();
+		
+		if((i+k)>b||(i+k)==b){
+		ctx.moveTo((i+k)*(1/4*u)+(u/2),(u/2)-(1/4*u)*b2);
+		ctx.lineTo((i+k)*(1/4*u)+(u/2), (u/2));
+		ctx.stroke();
+		}
+
+		atrap=calcolaAreaTrap(b1, b2, k);
+		areatot+=atrap;
+		}
+		myDisplayer(areatot);
+}
+function disegnaGrafico(){
+		
+		var canvas = document.getElementById("integrale");
+		var ctx = canvas.getContext("2d");
+		canvas.width = canvas.width;
+		var u=Number(document.getElementById("u").value);
+		disegnaAssi(u);
+		var xc=u/2, yc=u/2;	
+		var a=-5, b=5;
+//		var a=Number(document.getElementById("a").value);
+//		var b=Number(document.getElementById("b").value);
+		var n=Number(document.getElementById("n").value);
+		var k =Math.abs(b-a)/n;			
+		var y;
+		for (var i=a; i<b;i=i+k){
+		y=calcFunzione(i);
+		var canvas = document.getElementById("integrale");
+		var ctx = canvas.getContext("2d");
+		ctx.fillStyle = "#000000";
+		ctx.fillRect(i*(0.5*xc)+xc, yc-0.5*yc*y,2,2);				//mantengo le proporzioni 1:1
+		ctx.stroke();
+		}
+}
+
+
+
+</script>
+
+</body>
+</html>

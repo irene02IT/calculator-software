@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Algoritmi per il calcolo numerico</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='favicon.ico' rel='icon'>
+  <link href='favicon.ico' rel='apple-touch-icon'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <style>
+  .fakeimg {
+    height: 200px;
+    background: #aaa;
+  }
+#keyboard td {
+  width:80px;
+  height:35px;
+  margin:1px;
+  font-size:15px;
+}
+#keyboard #spazio{
+  width:160px;
+  height:35px;
+  margin:1px;
+  font-size:15px;
+}
+#keyboard #x{
+  width:160px;
+  height:35px;
+  margin:1px;
+  font-size:15px;
+}
+#keyboard #pi{
+  width:120px;
+  height:35px;
+  margin:1px;
+  font-size:15px;
+}
+#keyboard #eulero{
+  width:120px;
+  height:35px;
+  margin:1px;
+  font-size:15px;
+}
+  </style>
+</head>
+<body>
+
+<div class="jumbotron text-center" style="margin-bottom:0">
+  <h1>Calcolatore di radici approssimate</h1>
+  <h5>Metodo del punto fisso</h5>  
+</div>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="analisi-numerica.html">Algoritmi per il calcolo numerico</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="tangenti.html">Metodo delle tangenti (o di Newton)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="bisezione.html">Metodo di bisezione</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="punto-fisso.html">Metodo del punto fisso</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="integrazione-grafica.html">Integrazione per via grafica</a>
+      </li>	  
+    </ul>
+  </div>  
+</nav>
+
+<div class="container" style="margin-top:30px">
+  <div class="row">
+  	  <div class="col-sm-8 align-text-center">
+		<ul>NB:<li>usa correttamente gli spazi</li><li>lascia l'equazione in formato Math object</li><li>Utilizza "." invece di ","</li><li>L'equazione deve essere già trasformata in <b>g(x)=x</b></li><li>Nel grafico sono riportate le funzioni y<sub>1</sub>=x e y<sub>2</sub>=g(x): clicca su "mostra grafico" per visualizzarlo</li><li>Aiutati col grafico nella ricerca dell'intervallo</li></ul>	  		
+		<canvas id="grafico" class="collapse" width="800" height="400" style="border:1px solid #000000;"></canvas>		  
+	  </div>
+	  <div class="col-sm-12">
+		  <form name="equazione">
+			<div class="input-group mb-3" >
+			  <input type="text" class="form-control" name="display" placeholder="Equazione" value="Math.log(4 - x)">
+			  <div class="input-group-append">
+				<span class="input-group-text"> = x</span>
+				<button class="btn btn-success" type="button" onclick="disegnaGrafico()">grafico</button>
+				<button class="btn btn-success" type="button" onclick="calculate()">Calcola</button>
+				<button type="button" class="btn btn-danger" id="canc-all" onclick="resetFields();">cancella tutto</button>
+			  </div>
+			</div>
+		  </form>
+		<button class="btn btn-warning" type="button" data-toggle="collapse" data-target="#keyboard">tastiera</button>
+		<button class="btn btn-warning" type="button" data-toggle="collapse" data-target="#grafico">mostra grafico</button>
+
+	  </div>
+
+	  <div class="col-lg-4">
+		<table  id="keyboard" class="collapse">
+			<tr>
+			  <td type="button" class="btn btn-danger" id="cancella" onclick="cancella()">&#8592 </td>	  
+			  <td type="button" class="btn btn-info" id="x" onclick="equazione.display.value+='x';">x</td>	  
+			</tr>
+
+			<tr>
+			  <td type="button" class="btn btn-info" id="radq" onclick="equazione.display.value+='Math.sqrt(x)';">&#8730x </td>
+			  <td type="button" class="btn btn-info" id="radcb" onclick="equazione.display.value+='Math.cbrt(x)';">&#8731x </td>
+			  <td type="button" class="btn btn-info" id="pow" onclick="equazione.display.value+='Math.pow(x,y)';">x<sup>y</sup></td>
+
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="e^x" onclick="equazione.display.value+='Math.exp(x)';">e<sup>x</sup></td>
+			  <td type="button" class="btn btn-info" id="ln" onclick="equazione.display.value+='Math.log(x)';">ln(x)</td>
+			  <td type="button" class="btn btn-info" id="log10" onclick="equazione.display.value+='Math.log10(x)';">log<sub>10</sub>(x)</td>
+
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="sen" onclick="equazione.display.value+='Math.sin(x)';">sin(x)</td>
+			  <td type="button" class="btn btn-info" id="cos" onclick="equazione.display.value+='Math.cos(x)';">cos(x)</td>
+			  <td type="button" class="btn btn-info" id="tan" onclick="equazione.display.value+='Math.tan(x)';">tan(x)</td>
+
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="arcsen" onclick="equazione.display.value+='Math.asin(x)';">sin<sup>-1</sup>(x)</td>
+			  <td type="button" class="btn btn-info" id="arccos" onclick="equazione.display.value+='Math.acos(x)';">cos<sup>-1</sup>(x)</td>
+			  <td type="button" class="btn btn-info" id="arctan" onclick="equazione.display.value+='Math.atan(x)';">tan<sup>-1</sup>(x)</td>
+			</tr>
+		</table>
+	  </div>
+
+	  <div class="col-lg-4">
+		<table  id="keyboard" class="collapse">
+			<tr>		
+			  <td type="button" class="btn btn-info" id="eulero" onclick="equazione.display.value+='Math.E';">e</td>
+			  <td type="button" class="btn btn-info" id="pi" onclick="equazione.display.value+='Math.PI';">&#8719 </td>
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="1" onclick="equazione.display.value+='7';">7</td>
+			  <td type="button" class="btn btn-info" id="2" onclick="equazione.display.value+='8';">8</td>
+			  <td type="button" class="btn btn-info" id="3" onclick="equazione.display.value+='9';">9</td>
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="4" onclick="equazione.display.value+='4';">4</td>
+			  <td type="button" class="btn btn-info" id="5" onclick="equazione.display.value+='5';">5</td>
+			  <td type="button" class="btn btn-info" id="6" onclick="equazione.display.value+='6';">6</td>
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="1" onclick="equazione.display.value+='1';">1</td>
+			  <td type="button" class="btn btn-info" id="2" onclick="equazione.display.value+='2';">2</td>
+			  <td type="button" class="btn btn-info" id="3" onclick="equazione.display.value+='3';">3</td>
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="0" onclick="equazione.display.value+='0';">0</td>
+			  <td type="button" class="btn btn-info" id="," onclick="equazione.display.value+='.';">.</td>
+			</tr>
+		</table>			
+      </div>
+	  <div class="col-lg-4">
+		<table  id="keyboard" class="collapse">
+			<tr>
+			  <td type="button" class="btn btn-info" id="(" onclick="equazione.display.value+='(';">(</td>
+			  <td type="button" class="btn btn-info" id=")" onclick="equazione.display.value+=')';">)</td>
+			</tr>
+			<tr>			
+			  <td type="button" class="btn btn-info" id="/" onclick="equazione.display.value+='/';">/</td>
+			  <td type="button" class="btn btn-info" id="*" onclick="equazione.display.value+='*';">*</td>
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="+" onclick="equazione.display.value+='+';">+</td>
+			  <td type="button" class="btn btn-info" id="-" onclick="equazione.display.value+='-';">-</td> 
+			</tr>
+			<tr>
+			  <td type="button" class="btn btn-info" id="spazio" onclick="equazione.display.value+=' ';">spazio</td>			
+			</tr>
+		</table>			
+      </div>
+  </div>
+
+  <div class="row">
+	  <div class="col-sm-3">
+		<div class="form-group">
+		  <label for="a">Estremo sinistro:</label>
+		  <input type="number" class="form-control" id="a" value="0.5" placeholder="Estremo sinistro">
+		</div>
+	  </div>
+	  <div class="col-sm-3">
+		<div class="form-group">
+		  <label for="b">Estremo destro:</label>
+		  <input type="number" class="form-control" id="b" value="2" placeholder="Estremo destro">
+		</div>
+	  </div>
+	  <div class="col-sm-3">
+		<div class="form-group">
+		  <label for="tol">Precisione (numero di cifre decimali):</label>
+		  <input type="number" class="form-control" id="tol" min="0" value="1">
+		</div>
+	  </div>
+	  <div class="col-sm-3">
+		<div class="form-group">	  
+		  <label for="u">Dimensioni grafico:</label>
+		  <input type="number" class="form-control" id="u" value="350" step="10" placeholder="lato canvas">
+		</div>
+	  </div>	  
+		<div class="form-group col-sm-4">
+		  <label for="sol">Soluzione:</label>
+		  <textarea type="text" class="form-control" id="sol"></textarea>
+		</div>		  
+		<div class="form-group col-sm-4">
+		  <label for="f(sol)">Valore della funzione in x<sub>n</sub>:</label>
+		  <textarea type="text" class="form-control" id="f(sol)"></textarea>
+		</div>
+		<div class="form-group col-sm-4">
+		  <label for="niter">Numero di iterazioni:</label>
+		  <textarea type="text" class="form-control" id="niter"></textarea>
+		</div>	  
+	<div class="container ">
+	  <div class="table-responsive">
+		<table class="table table-bordered" id="table">
+		</table>
+	  </div>
+	</div>
+  </div>
+</div>
+
+<div class="jumbotron text-center" style="margin-bottom:0">
+  <p>Irene Erba - IS Rota</p>
+</div>
+
+
+<script language="javascript">
+
+//------------------------------grafico--------------------------------
+function disegnaAssi(u){
+		var canvas = document.getElementById("grafico");
+		var ctx = canvas.getContext("2d");
+		var xc=u/2, yc=u/2;
+		var a=-2, b=2, n=1000;
+		ctx.moveTo(xc, 0);
+		ctx.lineTo(xc, 3*u);
+		ctx.stroke();
+		ctx.moveTo(0, yc);
+		ctx.lineTo(3*u, yc);
+		ctx.stroke();
+		ctx.font = ""+1/40*u+"px Arial";
+		var dx=u/Math.abs(b-a);
+		for(var i=1; i<20; i++){
+		ctx.fillText("-"+i, xc, yc+i*dx);		
+		ctx.fillText("+"+i, xc, yc-i*dx);
+		ctx.fillText("-"+i, xc-i*dx, yc);
+		ctx.fillText("+"+i, xc+i*dx, yc);
+		}
+}
+
+function disegnaGrafico(){
+	
+		var canvas = document.getElementById("grafico");
+		var ctx = canvas.getContext("2d");
+		canvas.width = canvas.width;
+		var u=Number(document.getElementById("u").value);
+		disegnaAssi(u);
+		var xc=u/2, yc=u/2;	
+		var xmin=-5, xmax=5, n=10000;
+		var a=Number(document.getElementById("a").value);
+		var b=Number(document.getElementById("b").value);
+
+//		var n=Number(document.getElementById("n").value);
+		var k =Math.abs(xmax-xmin)/n;			
+		var y;
+		
+		for (var i=xmin; i<xmax;i=i+k){
+		y=calcFunzioneGx(i);
+		ctx.fillStyle = "#000000";
+		ctx.fillRect(i*(0.5*xc)+xc, yc-0.5*yc*y,1,1);				//grafico y=g(x)
+		}
+		for (var i=xmin; i<xmax;i=i+k){									
+		y=i;
+		ctx.fillStyle = "#000000";
+		ctx.fillRect(i*(0.5*xc)+xc, yc-0.5*yc*y,1,1);				//grafico y=x
+		}
+		ctx.font = ""+1/40*u+"px Arial";
+		ctx.fillText("x="+a, (a)*(0.5*xc)+xc+5, (yc-0.5*yc)/3);
+		ctx.fillText("x="+b, (b)*(0.5*xc)+xc+5, (yc-0.5*yc)/3);
+		for (var i=xmin; i<xmax;i=i+k){										
+		y=i;
+		ctx.fillStyle = "#ff0000";
+		ctx.fillRect(a*(0.5*xc)+xc, yc-0.5*yc*y,1,1);				//x=a e x=b (confini intervallo)
+		ctx.fillRect(b*(0.5*xc)+xc, yc-0.5*yc*y,1,1);
+		}		
+}
+
+function drawSteps(array){
+		var u=Number(document.getElementById("u").value);
+		var xc=u/2, yc=u/2;		
+		var aLen = array.length;
+		var canvas = document.getElementById("grafico");
+		var ctx = canvas.getContext("2d");
+		ctx.fillStyle = "DodgerBlue";
+		ctx.moveTo(array[0]*(0.5*xc)+xc, yc);
+		ctx.lineTo(array[0]*(0.5*xc)+xc, yc-0.5*yc*calcFunzioneGx(array[0]));	
+		ctx.stroke();
+		
+		for(i=0; i<aLen; i+=2){
+		ctx.fillStyle = "DodgerBlue";
+		ctx.moveTo(array[i]*(0.5*xc)+xc, yc-0.5*yc*calcFunzioneGx(array[i]));
+		ctx.lineTo(array[i+2]*(0.5*xc)+xc, yc-0.5*yc*calcFunzioneGx(array[i]));	
+		ctx.stroke();
+		ctx.moveTo(array[i+2]*(0.5*xc)+xc, yc-0.5*yc*calcFunzioneGx(array[i]));	
+		ctx.lineTo(calcFunzioneGx(array[i])*(0.5*xc)+xc, yc-0.5*yc*calcFunzioneGx(array[i+2]));	
+		ctx.stroke();		
+		}
+}
+//--------------------------------------------------------------------------
+
+function cancella() {
+  var temp = document.equazione.display.value;
+  document.equazione.display.value = temp.substring(0, temp.length-1);
+}
+
+function resetFields(){
+  document.getElementById("sol").innerHTML = "";
+  document.getElementById("f(sol)").innerHTML = "";
+  document.equazione.display.value = "";
+  document.getElementById("niter").innerHTML = "";
+  document.getElementById("table").innerHTML = "";
+  document.getElementById("a").value = 0;
+  document.getElementById("b").value = 0;
+  document.getElementById("tol").value = 0;  
+}
+
+function calcMedia(c,d){	//ok
+	var m = (c+d)/2;
+	return eval(m);
+}
+
+function calcErrore(f,g){	//ok
+	var e = (g-f)/2;
+	return  e;
+}
+
+function mySolutionDisplayer(some) {	//ok
+  document.getElementById("sol").innerHTML = some;
+}
+
+function mySolutionDisplayer2(some) {	//ok
+  document.getElementById("f(sol)").innerHTML = some;
+}
+
+function myIterationDisplayer(some) {	//ok
+  document.getElementById("niter").innerHTML = some;
+}
+
+function myTableDisplayer(t) {
+  document.getElementById("table").innerHTML = t;
+}
+
+function calcFunzione(q){		//ok
+	let testo=document.equazione.display.value+" - x";			//ritrasforma nella funzione principale
+	var hidexp=testo.toString().replace(/exp/g,'eàp');			//corregge il caso di Math.e-x-p: 'nasconde' la 'x' con una 'à'(lettera a caso che non compare nelle funzioni)
+	hidexp=hidexp.replace(/x/g,q);
+	var f=hidexp.replace(/à/g,'x');
+	return eval(f);	
+}
+
+function calcFunzioneGx(q){		//ok
+	let testo=document.equazione.display.value;	
+	var hidexp=testo.toString().replace(/exp/g,'eàp');			//corregge il caso di Math.e-x-p: 'nasconde' la 'x' con una 'à'(lettera a caso che non compare nelle funzioni)
+	hidexp=hidexp.replace(/x/g,q);
+	var f=hidexp.replace(/à/g,'x');
+	return eval(f);	
+}
+
+function checkInput(){							//controllo dei valori in input prima di eseguire l'algoritmo
+  var xa, xb, xf, xd, fxa, fxb, errore=false;
+
+  xa = document.getElementById("a").value;
+  xb = document.getElementById("b").value;
+  xf = document.equazione.display.value;
+  fxa=calcFunzione(xa);
+  fxb=calcFunzione(xb);
+  
+    if(xa == "" ||xb == "" ||xf == ""||xd == ""){  alert("Errore, compila tutti i campi"); errore=true;}
+	if(xa.search(",")!=-1 || xb.search(",")!=-1){ alert("Errore, utilizza '.' invece di ','"); errore=true;}
+    xa = Number(xa);
+	xb = Number(xb);
+    fxa = Number(fxa);
+	fxb = Number(fxb);
+    if(xa>xb || xa==xb){  alert("Errore, estremi non validi"); errore=true;}
+    if(fxa*fxb>0){  alert("Errore, f(a)*f(b)>0 : il metodo non è applicabile"); errore=true;}
+
+	return errore;
+}
+
+function buildTable(arr){
+
+var text="", fLen, i, n=0;
+
+aLen = arr.length;
+text="<thead> <tr> <th>n</th><th>x<sub>n</sub></th><th>errore=(x<sub>n</sub>-x<sub>n-1</sub>)/2</th></thead><tbody>";
+
+for (i = 0; i < aLen; i++) {
+  if(i%2==0 || i==0){
+	text += "<tr><td>"+ n + "</td>";
+	n++;
+  }
+  text += "<td>" + arr[i] + "</td>";
+  if((i+1)%2==0 || i==aLen){
+    text += "</tr>";
+  }
+}
+text+="</tbody>";
+myTableDisplayer(text);
+}
+
+function calculate(){		//funzione principale
+
+var err=checkInput();
+disegnaGrafico();
+if(err==false){
+
+	var xn=0, kmax=40, k=0, soluzione=0, xp=0, fsol=0;
+	var a=Number(document.getElementById("a").value);
+	var b=Number(document.getElementById("b").value);
+	var dec=document.getElementById("tol").value;
+	var tol=Math.pow(10,-dec);						//tolleranza come 10^(-ncifredecimali)
+
+	var myArray=[];
+	xn=a;
+	//quando f(xp)*f(xp+10^(dec))<0 il ciclo si arresta
+	while (k<kmax&& calcFunzione(xp)*(calcFunzione(xp+tol))>0){	
+	xp=xn;
+	myArray.push(xn);
+	xn=calcFunzioneGx(xn);
+	var e=calcErrore(xp,xn);
+	myArray.push(e);
+	k++;
+	}
+	if(k>=kmax){
+		soluzione="successione divergente";
+		fsol="";
+	}else{
+		soluzione=xn;
+		fsol=calcFunzione(xn);	
+		myIterationDisplayer(k);
+	}
+	drawSteps(myArray);
+	mySolutionDisplayer(soluzione);
+	mySolutionDisplayer2(fsol);
+	buildTable(myArray);
+
+
+	}
+}
+
+</script>
+
+</body>
+</html>
